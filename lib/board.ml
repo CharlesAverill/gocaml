@@ -11,6 +11,14 @@ let string_of_point point = Printf.sprintf "(%d, %d)" point.x point.y
   *)
 type color = Black | White | Empty
 
+let string_of_color = function
+  | Black ->
+      "Black"
+  | White ->
+      "White"
+  | Empty ->
+      "Empty"
+
 (** Get the opposite of a color *)
 let opposite color =
   match color with Black -> White | White -> Black | Empty -> Empty
