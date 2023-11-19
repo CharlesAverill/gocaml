@@ -34,22 +34,25 @@ let rec get_liberties board point =
 type group = {points: point list; liberties: point list}
 
 (** Get the list of points making up a group connected at a given point *)
-let rec get_group_points board point =
-  let color = read board point in
-  let flood = opposite color in
-  write board point flood ;
-  List.fold_left
-    (fun stones neighbor ->
-      if
-        read board neighbor = color
-        && not (List.exists (fun x -> x = neighbor) stones)
-      then stones @ get_group_points board neighbor
-      else stones )
-    [point] (neighbors board point)
+let rec get_group_points board point : point list =
+  let stones = ref [] in
+  let my_color = read board point in
+  if my_color = Empty then []
+  else
+    let floodfill_color = opposite my_color in
+    write board point floodfill_color ;
+    let process_neighbor stones neighbor =
+      if read board neighbor = my_color && not (List.mem neighbor !stones) then
+        stones := !stones @ get_group_points board neighbor
+      else stones := !stones
+    in
+    let neighbors = neighbors board point in
+    List.iter (process_neighbor stones) neighbors ;
+    point :: !stones
 
 (** Get a group *)
 let get_group board point =
-  let points = get_group_points board point in
+  let points = get_group_points (copy board) point in
   { points
   ; liberties=
       List.fold_left
@@ -137,4 +140,5 @@ let place board move =
         else acc )
       [] (neighbors board point)
   in
-  board.ko := if List.length captured = 1 then Some (List.hd captured) else None
+  board.ko := if List.length captured = 1 then Some (List.hd captured) else None ;
+  write board point color
