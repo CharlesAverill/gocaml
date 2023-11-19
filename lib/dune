@@ -1,0 +1,3 @@
+(library
+ (name gocaml)
+ (modules board game_logic logging))
